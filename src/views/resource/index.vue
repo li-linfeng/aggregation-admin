@@ -10,12 +10,28 @@
       <el-radio-group v-model="listQuery.filter_col">
         <el-radio label="filter_id">按id</el-radio>
         <el-radio label="filter_name">按源名</el-radio>
-        <el-radio label="filter_link">按链接</el-radio>
+        <el-radio label="filter_website">按链接</el-radio>
       </el-radio-group>
 
       <el-input v-model="listQuery.filter_val" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+
+      <el-date-picker
+        v-model="listQuery.filter_date"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        format="yyyy-MM-dd"
+        value-format="yyyy-MM-dd"
+      >
+      </el-date-picker>
       <el-button  class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
+      </el-button>
+          <el-button :loading="downloadLoading" style="margin:0 0 20px 20px;" type="primary" icon="el-icon-document" @click="handleDownload">
+        导出excel
       </el-button>
     </div>
   <el-table
@@ -48,13 +64,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="描述" align="center" width="200">
+      <el-table-column label="描述" align="center" width="300">
         <template slot-scope="{row}">
           <span class="link-type" >{{ row.description }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="所属分类" align="center" width="100">
+      <el-table-column label="所属分类" align="center" width="120">
         <template slot-scope="{row}">
           <div v-for="(tags, tagsIndex) in row.topics" :key="tagsIndex">
             <el-tag type="success">
@@ -82,7 +98,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="提交人" align="center" width="70">
+      <el-table-column label="提交人" align="center" width="90">
         <template slot-scope="{row}">
           <span>{{  row.user_id >0 ? row.user_id :"管理员" }}</span>
         </template>
@@ -96,36 +112,36 @@
 
       <el-table-column label="公开状态" align="center" width="80">
         <template slot-scope="{row}">
-            <el-tag :type="row.is_show == 0 ? 'danger':'success' ">
-              {{row.is_show ==0 ? "否" :"是"}}
+            <el-tag :type="row.user_id == 0 ? 'success':'danger' ">
+              <!-- {{row.user_id ==0 ? "是" :"否"}} -->
+
+              {{row.is_show}}
             </el-tag>
         </template>
       </el-table-column>
 
-     
-    <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="{row}" >
-            <el-button type="primary" size="mini"  @click="showDialog(row)">
-              编辑 
-            </el-button>
-            <el-button  size="mini" type="danger"   @click="deleteResource(row)">
-              删除
-            </el-button>
-        </template> 
-     </el-table-column>
+    <el-table-column label="上线/下线" align="center" width="100">
+        <template slot-scope="{row}">
+           <el-switch
+                v-model ="row.is_show"
+                active-color="green"
+                inactive-color="red"
+                :active-value="1"
+                :inactive-value="0"
+                @change="changeSwitch(row)"
+            >
+           </el-switch>
+        </template>
+    </el-table-column>
   </el-table>
 
   <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :per_page.sync="listQuery.per_page" @pagination="getList" />
-
-   <el-dialog title="编辑源" :visible.sync="dialogVisible"  width="80%">
-    
-  </el-dialog>
-
   </div>
 </template>
 
 <script>
-import { getResourceList, editResource, deleteResource} from '@/api/resource'
+import {getResourceList, switchResource,exportResource} from '@/api/resource'
+import { downloadBlob } from '@/utils/help'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
@@ -136,12 +152,14 @@ export default {
       list      : null,
       total     : 0,
       dialogVisible: false,
+      downloadLoading :false,
       listQuery: {
         page: 1,
         per_page: 10,
         filter_is_show: "2",
         filter_val:"",
-        filter_col:"filter_id"
+        filter_col:"filter_id",
+        filter_date:null,
       },
     }
   },
@@ -155,6 +173,17 @@ export default {
         this.total = response.meta.pagination.total
       })
     },
+    handleDownload(){
+      this.downloadLoading = true
+      exportResource(this.listQuery).then((res) => {
+        const type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const name = `资源列表${Date.now()}.xlsx`;
+        downloadBlob(res, type, name);
+      })
+      .finally(() => {
+        this.downloadLoading = false
+      });   
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
@@ -163,8 +192,8 @@ export default {
       this.target = row
       this.dialogVisible = true
     },
-    deleteResource(row){
-
+    changeSwitch(row){
+       switchResource(row.id)
     }
   }
 }
@@ -178,24 +207,6 @@ export default {
     
    .filter-item {
         margin-right: 15px;
-        margin-left: 5px;
-    }
-
-    .add-time{
-      line-height: 20px;
-    }
-    .user-name{
-      color: #409EFF;
-      padding-right: 3px;
-    }
-    .user-mobile{
-      color: #409EFF;
-    }
-    .day-input{
-      line-height: 24px;
-      text-align: center;
-      width: 12%;
-      margin-left: 10px;
-      margin-right: 5px;
+        margin-left: 10px;
     }
 </style>

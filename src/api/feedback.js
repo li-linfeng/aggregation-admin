@@ -8,18 +8,10 @@ export function getFeedbackList(query) {
   })
 }
 
-export function replyFeedback(id,data) {
-  return request({
-    url: `/admin/feedback/${id}/reply`,
-    method: 'post',
-    data
-  })
-}
-
 
 export function deleteFeedback(id) {
     return request({
-      url: `/admin/feedback/${id}`,
+      url: `/admin/feedbacks/${id}`,
       method: 'delete',
     })
   }

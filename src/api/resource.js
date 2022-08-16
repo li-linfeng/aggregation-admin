@@ -8,27 +8,27 @@ export function getResourceList(query) {
   })
 }
 
-export function editResource(id,data) {
+export function switchResource(id,data) {
   return request({
-    url: `/admin/resource/${id}`,
-    method: 'put',
-    data
+    url: `/admin/resources/${id}/switch`,
+    method: 'patch',
   })
 }
 
 
 export function deleteResource(id) {
     return request({
-      url: `/admin/resource/${id}`,
+      url: `/admin/resources/${id}`,
       method: 'delete',
     })
 }
 
 
-export function exportExcel(query) {
+export function exportResource(query) {
     return request({
-      url: `/admin/resource/excel`,
+      url: `/admin/resources/export`,
       method: 'get',
-      params:  query 
+      params:  query ,
+      responseType: "blob",
     })
 }

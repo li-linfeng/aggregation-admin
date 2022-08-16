@@ -9,6 +9,9 @@
       <el-button  class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
+      <el-button :loading="downloadLoading" style="margin:0 0 20px 20px;" type="primary" icon="el-icon-document" @click="handleDownload">
+        导出excel
+      </el-button>
     </div>
   <el-table
       :data="list"
@@ -144,7 +147,8 @@
 </template>
 
 <script>
-import { getUserList, switchStatus, addTime} from '@/api/user'
+import { getUserList, switchStatus, addTime, exportUser} from '@/api/user'
+import { downloadBlob } from '@/utils/help'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
@@ -154,6 +158,7 @@ export default {
     return {
       list      : null,
       total     : 0,
+      downloadLoading:false,
       target : {
         nickname : "",
         mobile: "",
@@ -182,6 +187,17 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    handleDownload(){
+      this.downloadLoading = true
+      exportUser(this.listQuery).then((res) => {
+        const type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const name = `用户列表${Date.now()}.xlsx`;
+        downloadBlob(res, type, name);
+      })
+      .finally(() => {
+        this.downloadLoading = false
+      });   
     },
     showDialog(row){
       this.target = row
