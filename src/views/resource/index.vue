@@ -22,24 +22,32 @@
         <el-radio label="filter_website">按链接</el-radio>
       </el-radio-group>
 
-      <el-input v-model="listQuery.filter_val" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.filter_val"
+                style="width: 200px;"
+                class="filter-item"
+                @keyup.enter.native="handleFilter" />
 
-      <el-date-picker
-        v-model="listQuery.filter_date"
-        type="daterange"
-        align="right"
-        unlink-panels
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        format="yyyy-MM-dd"
-        value-format="yyyy-MM-dd"
-      >
+      <el-date-picker v-model="listQuery.filter_date"
+                      type="daterange"
+                      align="right"
+                      unlink-panels
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="yyyy-MM-dd"
+                      value-format="yyyy-MM-dd">
       </el-date-picker>
-      <el-button  class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+      <el-button class="filter-item"
+                 type="primary"
+                 icon="el-icon-search"
+                 @click="handleFilter">
         搜索
       </el-button>
-          <el-button :loading="downloadLoading" style="margin:0 0 20px 20px;" type="primary" icon="el-icon-document" @click="handleDownload">
+      <el-button :loading="downloadLoading"
+                 style="margin:0 0 20px 20px;"
+                 type="primary"
+                 icon="el-icon-document"
+                 @click="handleDownload">
         导出excel
       </el-button>
     </div>
@@ -84,7 +92,7 @@
 
       <el-table-column label="描述"
                        align="center"
-                       width="200">
+                       width="390">
         <template slot-scope="{row}">
           <span class="link-type">{{ row.description }}</span>
         </template>
@@ -92,7 +100,7 @@
 
       <el-table-column label="所属分类"
                        align="center"
-                       width="100">
+                       width="140">
         <template slot-scope="{row}">
           <div v-for="(tags, tagsIndex) in row.topics"
                :key="tagsIndex">
@@ -145,7 +153,8 @@
 
       <el-table-column label="公开状态"
                        align="center"
-                       width="80">
+                       width="80"
+                       class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-switch :value="row.is_show >0"
                      active-color="#13ce66"
@@ -155,7 +164,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作"
+      <!-- <el-table-column label="操作"
                        align="center"
                        class-name="small-padding fixed-width">
         <template slot-scope="{row}">
@@ -165,7 +174,7 @@
             删除
           </el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination v-show="total>0"
@@ -189,14 +198,14 @@ export default {
       list: null,
       total: 0,
       dialogVisible: false,
-      downloadLoading :false,
+      downloadLoading: false,
       listQuery: {
         page: 1,
         per_page: 10,
         filter_is_show: "2",
-        filter_val:"",
-        filter_col:"filter_id",
-        filter_date:null,
+        filter_val: "",
+        filter_col: "filter_id",
+        filter_date: null,
       },
     }
   },
@@ -217,16 +226,16 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
-    handleDownload(){
+    handleDownload () {
       this.downloadLoading = true
       exportResource(this.listQuery).then((res) => {
         const type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         const name = `资源列表${Date.now()}.xlsx`;
         downloadBlob(res, type, name);
       })
-      .finally(() => {
-        this.downloadLoading = false
-      });   
+        .finally(() => {
+          this.downloadLoading = false
+        });
     },
     updateStatus (row) {
       switchStatus(row.id).then(res => {
