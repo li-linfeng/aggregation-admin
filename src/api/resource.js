@@ -8,26 +8,18 @@ export function getResourceList(query) {
   })
 }
 
-export function editResource(id,data) {
+export function switchStatus(id) {
   return request({
-    url: `/admin/resource/${id}`,
-    method: 'put',
-    data
+    url: `/admin/resources/${id}/switch`,
+    method: 'patch',
   })
 }
 
 
-export function deleteResource(id) {
-    return request({
-      url: `/admin/resource/${id}`,
-      method: 'delete',
-    })
-}
-
 
 export function exportExcel(query) {
     return request({
-      url: `/admin/resource/excel`,
+      url: `/admin/resources/excel`,
       method: 'get',
       params:  query 
     })
