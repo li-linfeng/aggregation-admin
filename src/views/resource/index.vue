@@ -19,18 +19,28 @@
       <el-radio-group v-model="listQuery.filter_col">
         <el-radio label="filter_id">按id</el-radio>
         <el-radio label="filter_name">按源名</el-radio>
-        <el-radio label="filter_link">按链接</el-radio>
+        <el-radio label="filter_website">按链接</el-radio>
       </el-radio-group>
 
-      <el-input v-model="listQuery.filter_val"
-                style="width: 200px;"
-                class="filter-item"
-                @keyup.enter.native="handleFilter" />
-      <el-button class="filter-item"
-                 type="primary"
-                 icon="el-icon-search"
-                 @click="handleFilter">
+      <el-input v-model="listQuery.filter_val" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+
+      <el-date-picker
+        v-model="listQuery.filter_date"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        format="yyyy-MM-dd"
+        value-format="yyyy-MM-dd"
+      >
+      </el-date-picker>
+      <el-button  class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
+      </el-button>
+          <el-button :loading="downloadLoading" style="margin:0 0 20px 20px;" type="primary" icon="el-icon-document" @click="handleDownload">
+        导出excel
       </el-button>
     </div>
     <el-table :data="list"
@@ -179,12 +189,14 @@ export default {
       list: null,
       total: 0,
       dialogVisible: false,
+      downloadLoading :false,
       listQuery: {
         page: 1,
         per_page: 10,
         filter_is_show: "2",
-        filter_val: "",
-        filter_col: "filter_id"
+        filter_val:"",
+        filter_col:"filter_id",
+        filter_date:null,
       },
     }
   },
@@ -204,6 +216,17 @@ export default {
     handleFilter () {
       this.listQuery.page = 1
       this.getList()
+    },
+    handleDownload(){
+      this.downloadLoading = true
+      exportResource(this.listQuery).then((res) => {
+        const type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const name = `资源列表${Date.now()}.xlsx`;
+        downloadBlob(res, type, name);
+      })
+      .finally(() => {
+        this.downloadLoading = false
+      });   
     },
     updateStatus (row) {
       switchStatus(row.id).then(res => {

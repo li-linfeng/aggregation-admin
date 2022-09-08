@@ -21,6 +21,7 @@ export function exportExcel(query) {
     return request({
       url: `/admin/resources/excel`,
       method: 'get',
-      params:  query 
+      params:  query ,
+      responseType: "blob",
     })
 }

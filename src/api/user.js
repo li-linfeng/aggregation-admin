@@ -24,3 +24,12 @@ export function addTime(id, data) {
     data
   })
 }
+
+export function exportUser(query) {
+  return request({
+    url:  `/admin/users/export`,
+    method: 'get',
+    params:  query ,
+    responseType: "blob",
+  })
+}
